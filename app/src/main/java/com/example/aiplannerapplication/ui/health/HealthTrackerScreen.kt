@@ -264,10 +264,10 @@ fun GoalProgressBar(
 
         // The actual progress bar
         LinearProgressIndicator(
-            progress = (current.toFloat() / goal).coerceIn(0f, 1f),
+            progress = (current.toFloat()/goal.toFloat()).coerceIn(0f,1f),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(8.dp)
+                .height(10.dp)
                 .clip(RoundedCornerShape(4.dp)),
             color = color,
             trackColor = color.copy(alpha = 0.2f)
