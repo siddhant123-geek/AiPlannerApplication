@@ -1,4 +1,4 @@
-package com.example.aiplannerapplication.data.local
+package com.example.aiplannerapplication.data.models
 
 import com.example.aiplannerapplication.TrackerType
 import com.example.aiplannerapplication.navHost.Route

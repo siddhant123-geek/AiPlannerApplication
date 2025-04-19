@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.aiplannerapplication.TrackerType
-import com.example.aiplannerapplication.data.local.TrackerItem
+import com.example.aiplannerapplication.data.models.TrackerItem
 import com.example.aiplannerapplication.navHost.Route
 
 @Composable
