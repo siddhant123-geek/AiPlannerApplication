@@ -1,10 +1,10 @@
 package com.example.aiplannerapplication.data.repository
 
-import android.util.Log
 import com.example.aiplannerapplication.data.api.NetworkService
 import com.example.aiplannerapplication.data.models.AuthState
+import com.example.aiplannerapplication.data.models.CredRequest
 import com.example.aiplannerapplication.data.models.Credentials
-import com.google.firebase.Firebase
+import com.example.aiplannerapplication.data.models.AuthResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import okhttp3.ResponseBody
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,11 +25,11 @@ class LoginRepository @Inject constructor(val networkService: NetworkService) {
         return firebaseAuth.currentUser
     }
 
-    suspend fun login(credentials: Credentials): Flow<Response<Unit>> {
-        return flow {
-            emit(networkService.login(credentials))
-        }
-    }
+//    suspend fun login(credentials: Credentials): Flow<Response<Unit>> {
+//        return flow {
+//            emit(networkService.login(credentials))
+//        }
+//    }
 
     fun registerUser(credentials: Credentials): Flow<AuthState<FirebaseUser>> = flow {
         // First emit loading state
@@ -65,6 +63,12 @@ class LoginRepository @Inject constructor(val networkService: NetworkService) {
         }
     }
 
+    fun registerUserCustom(credentials: Credentials): Flow<AuthResponse> = flow {
+        // First emit loading state
+        val credRequest = CredRequest(credentials.email, credentials.password)
+        emit(networkService.register(credRequest))
+    }
+
     fun loginUser(credentials: Credentials): Flow<AuthState<FirebaseUser>> = flow {
         emit(AuthState.Loading)
 
@@ -85,5 +89,11 @@ class LoginRepository @Inject constructor(val networkService: NetworkService) {
         } catch (e: Exception) {
             emit(AuthState.Error(e.message ?: "Login failed"))
         }
+    }
+
+    fun loginUserCustom(credentials: Credentials): Flow<AuthResponse> = flow {
+        // First emit loading state
+        val credRequest = CredRequest(credentials.email, credentials.password)
+        emit(networkService.login(credRequest))
     }
 }

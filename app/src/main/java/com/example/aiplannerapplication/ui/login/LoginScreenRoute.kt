@@ -1,6 +1,7 @@
 package com.example.aiplannerapplication.ui.login
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +57,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.aiplannerapplication.R
+import com.example.aiplannerapplication.data.models.AuthData
+import com.example.aiplannerapplication.data.models.AuthResponse
 import com.example.aiplannerapplication.data.models.AuthState
 import com.example.aiplannerapplication.data.models.Credentials
 import com.example.aiplannerapplication.navHost.navigateTo
@@ -63,31 +67,41 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun LoginScreenRoute(onLoginSuccess: (user: FirebaseUser)->Unit) {
-    LoginScreen(onLoginSuccess=onLoginSuccess, onSignUpClick={})
+fun LoginScreenRoute(onLoginSuccess: (user: AuthData)->Unit) {
+    LoginScreen(onLoginSuccess=onLoginSuccess)
 }
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    onLoginSuccess: (user: FirebaseUser) -> Unit,
-    onSignUpClick: () -> Unit
+    onLoginSuccess: (user: AuthData) -> Unit
 ) {
 //    val isLoading by viewModel.isLoading.collectAsState()
 //    val errorMessage by viewModel.errorMessage.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    val passwordVisible by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
+    var login by remember { mutableStateOf(true) }
 
     val authState by viewModel.authState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(authState) {
         Log.d("###", "LoginScreen: comig insidne authState laucnhed eff with auth State as " +
                 authState.toString())
         if (authState is AuthState.Authenticated) {
-            onLoginSuccess((authState as AuthState.Authenticated<FirebaseUser>).data)
+            onLoginSuccess((authState as AuthState.Authenticated<AuthResponse>).data.data)
+        }
+        else if(authState is AuthState.Error){
+            val errorText = (authState as AuthState.Error).error
+            Log.d("###", "LoginScreen: error in authentication " + errorText)
+            Toast.makeText(context, errorText, Toast.LENGTH_LONG).show()
+        }
+        else {
+            val errorText = (authState as AuthState.Unauthenticated)
+
         }
     }
 
@@ -243,7 +257,7 @@ fun LoginScreen(
 //                }
 //            }
 
-            // Login button
+            // Login/Signup button
             Button(
                 onClick = {
                     Log.d("###", "LoginScreen: login clciked")
@@ -251,7 +265,8 @@ fun LoginScreen(
                     Log.d("###", "LoginScreen: creds name " + creds.name)
                     Log.d("###", "LoginScreen: creds email " + creds.email)
                     Log.d("###", "LoginScreen: creds password " + creds.password)
-                    viewModel.register(creds)
+                    if(login) viewModel.login(credentials = creds)
+                    else viewModel.register(creds)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -275,8 +290,9 @@ fun LoginScreen(
 //                        fontWeight = FontWeight.Bold
 //                    )
 //                }
+                val text = if(login) "Login" else "Sign up"
                 Text(
-                    text = "Login",
+                    text = text,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold
                 )
@@ -331,24 +347,31 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             // Sign up link
+            val text1 = if(login) "Don't have an account? "
+            else "Already have an account? "
+
+            val text2 = if(login) "Signup"
+            else "Login"
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Don't have an account? ",
+                    text = text1,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
 
                 Text(
-                    text = "Sign Up",
+                    text = text2,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
                     color = Color(0xFF6200EE),
-                    modifier = Modifier.clickable { onSignUpClick() }
+                    modifier = Modifier.clickable {
+                        login = !login
+                    }
                 )
             }
 

@@ -52,7 +52,7 @@ fun AiPlannerNavHost(viewModel: LoginViewModel = hiltViewModel()) {
         }
         composable(Route.LandingScreenRoute.name) {
             LoginScreenRoute({user ->
-                Log.d("###", "AiPlannerNavHost: user email after successful login# " + user.email)
+                Log.d("###", "AiPlannerNavHost: user email after successful login " + user.email)
                 navigateTo(navController, Route.HomeRoute)
             })
         }
